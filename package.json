@@ -1,17 +1,21 @@
 {
   "name": "party-games",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Игры для вечеринки: Крокодил, Фанты и другие",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
-  "keywords": [],
+  "keywords": ["games", "party", "crocodile", "socket.io"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1",
+    "express": "^4.18.2",
     "socket.io": "^4.8.3"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
