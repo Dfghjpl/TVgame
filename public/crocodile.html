@@ -312,9 +312,20 @@ text-align: center;
       next: document.getElementById('next-btn'), qr: document.getElementById('qr-img')
     };
 
-    fetch('/get-ip').then(r => r.json()).then(data => {
-      els.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://${data.ip}:3000/player`;
-    });
+   // 🔄 Динамический QR: работает локально и в облаке
+const getPlayerUrl = () => {
+  const host = window.location.host; // берёт текущий домен (localhost:3000 или ...repl.co)
+  const protocol = window.location.protocol; // http: или https:
+  return `${protocol}//${host}/player`;
+};
+
+// Генерируем QR
+els.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(getPlayerUrl())}`;
+
+// Обновляем при изменении (на всякий случай)
+setTimeout(() => {
+  els.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(getPlayerUrl())}`;
+}, 1000);
 
     els.start.onclick = () => socket.emit('request-start-round');
     els.next.onclick = () => socket.emit('next-turn');
