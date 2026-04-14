@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="full-screen" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="tizen-app-mode" content="fullscreen">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0f1e">
+<link rel="manifest" href="/manifest.json">
+  <title>Выбор игры</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Poppins', Arial, sans-serif;
+      background: radial-gradient(circle at 20% 30%, #0a0f1e, #03050b);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      background: rgba(10, 20, 30, 0.65);
+      backdrop-filter: blur(8px);
+      border-radius: 48px;
+      padding: 40px 30px;
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.2), 0 8px 20px rgba(0,0,0,0.6);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 40px;
+      text-shadow: 0 0 8px cyan, 0 0 15px blue;
+      letter-spacing: 2px;
+    }
+
+    .game-btn {
+      display: inline-block;
+      margin: 20px;
+      padding: 18px 40px;
+      font-size: 1.8rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #1e2a3a, #0f1722);
+      color: #0ff;
+      text-decoration: none;
+      border-radius: 60px;
+      border: 1px solid #0ff;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+      transition: all 0.2s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .game-btn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #2a3f4f, #1a2535);
+      box-shadow: 0 0 25px cyan;
+      color: #fff;
+      border-color: #fff;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2rem; }
+      .game-btn { font-size: 1.2rem; padding: 12px 25px; margin: 12px; }
+      .container { padding: 30px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎲 ВЕЧЕР ИГР</h1>
+    <a href="/crocodile.html" class="game-btn">🐊 Крокодил</a>
+    <a href="/forfeits.html" class="game-btn">🎭 Фанты</a>
+  </div>
+  <script>
+// 📺 Полноэкранный режим для Samsung TV (Tizen)
+(function() {
+  let fsRequested = false;
+  
+  function goFullscreen() {
+    if (fsRequested) return;
+    fsRequested = true;
+    
+    // Tizen API (если доступен)
+    if (window.tizen && tizen.application) {
+      try {
+        tizen.application.getCurrentApplication().setScreenOrientation('LANDSCAPE');
+      } catch(e) {}
+    }
+    
+    // Standard Fullscreen API
+    const el = document.documentElement;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(()=>{});
+    } else if (el.webkitRequestFullscreen) { // Samsung/Chrome
+      el.webkitRequestFullscreen().catch(()=>{});
+    } else if (el.msRequestFullscreen) { // IE/Edge
+      el.msRequestFullscreen().catch(()=>{});
+    }
+  }
+  
+  // Запускаем по первому клику/тапу/нажатию кнопки на пульте
+  ['click', 'touchstart', 'keydown'].forEach(evt => {
+    document.addEventListener(evt, goFullscreen, {once: true, capture: true});
+  });
+  
+  // Дополнительно: пробуем сразу, если браузер разрешает
+  setTimeout(goFullscreen, 1000);
+})();
+</script>
+</body>
+</html>

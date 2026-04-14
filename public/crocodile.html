@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Крокодил - Ведущий</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+      background: radial-gradient(ellipse at 30% 40%, #0b1120, #010101);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1300px;
+      background: rgba(12, 20, 30, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 56px;
+      padding: 32px 28px;
+      box-shadow: 0 0 50px rgba(0, 255, 200, 0.25), 0 10px 30px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(0, 255, 255, 0.4);
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      text-align: center;
+      margin-bottom: 8px;
+      text-shadow: 0 0 8px cyan, 0 0 15px #00aaff;
+      letter-spacing: 3px;
+      color: #eef;
+    }
+
+    .rules {
+      text-align: center;
+      color: #bbd4ff;
+      margin-bottom: 40px;
+      font-size: 1rem;
+      background: rgba(0, 0, 0, 0.4);
+      display: inline-block;
+      width: auto;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 8px 24px;
+      border-radius: 40px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Сетка лобби */
+    .lobby-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    .left-col {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 32px;
+      padding: 24px;
+      border: 1px solid rgba(0, 255, 255, 0.3);
+    }
+
+    .left-col h3 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+      color: cyan;
+      border-left: 4px solid cyan;
+      padding-left: 16px;
+    }
+
+    #players-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #players-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 12px;
+      margin: 8px 0;
+      background: rgba(20, 30, 45, 0.7);
+      border-radius: 60px;
+      border-left: 4px solid cyan;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #f0f3ff;
+    }
+
+    .player-icon {
+      font-size: 1.6rem;
+      margin-right: 12px;
+    }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 32px;
+      padding: 24px;
+    }
+
+    #qr-container {
+      background: white;
+      padding: 16px;
+      border-radius: 28px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+
+    #qr-img {
+      width: 200px;
+      height: 200px;
+      display: block;
+      border-radius: 16px;
+    }
+
+    .btn {
+      width: 100%;
+      max-width: 320px;
+      padding: 18px 20px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #start-btn {
+      background: linear-gradient(145deg, #1e2c3c, #0f1822);
+      color: #0ff;
+      border: 1px solid cyan;
+      box-shadow: 0 6px 0 #001122;
+    }
+
+    #start-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: linear-gradient(145deg, #2a3f50, #1a2738);
+      box-shadow: 0 8px 20px rgba(0, 255, 255, 0.4);
+    }
+
+    #next-btn {
+      background: linear-gradient(145deg, #1a4d3e, #0e2a21);
+      color: #aaffdd;
+      border: 1px solid #2ecc71;
+      display: none;
+    }
+
+    #next-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: linear-gradient(145deg, #226b55, #143d30);
+      box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      transform: none;
+      cursor: not-allowed;
+    }
+
+    /* Экран активного раунда */
+    #active-round {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    #question-text {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 30px;
+  color: #ffffff; /* Цвет текста */
+  text-align: center; /* Текст по центру */
+  text-shadow: none; /* Убирает возможное свечение, если было унаследовано */
+}
+    #timer {
+      font-size: 10rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      font-family: monospace;
+      background: #00000066;
+      display: inline-block;
+      padding: 20px 50px;
+      border-radius: 80px;
+      margin-top: 20px;
+      transition: all 0.2s;
+	  color: #ffffff;
+    }
+
+    .timer-danger {
+      color: #ff4444 !important;
+      text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+      animation: pulse-red 0.5s infinite alternate;
+    }
+
+    .timer-warning {
+      color: #ffaa33 !important;
+      text-shadow: 0 0 15px rgba(255, 170, 51, 0.6);
+    }
+	      font-weight: 500;
+
+
+    @keyframes pulse-red {
+      from { text-shadow: 0 0 5px red; transform: scale(1); }
+      to { text-shadow: 0 0 25px red; transform: scale(1.05); }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 850px) {
+      .lobby-grid { grid-template-columns: 1fr; gap: 30px; }
+      h1 { font-size: 2.2rem; }
+      #question-text { font-size: 1.8rem; padding: 12px 24px; }
+      #timer { font-size: 5rem; padding: 15px 30px; }
+    }
+	/* 🎉 Оверлей угадывания */
+#guess-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(1, 1, 1, 0.92);
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  backdrop-filter: blur(6px);
+}
+/* Найдите #guess-text и добавьте/исправьте: */
+#guess-text {
+text-align: center;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 90vw;
+  font-size: 4rem;
+  font-weight: 900;
+  color: #00ffff;
+  text-align: center; /* 🔑 Центрирует текст внутри блока */
+  line-height: 1.3;
+  padding: 0 20px;
+  text-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 60px rgba(0, 255, 255, 0.4);
+  animation: popIn 0.4s ease;
+  margin: 0 auto; /* 🔑 Центрирует сам блок по горизонтали */
+  width: 100%; /* 🔑 Занимает всю ширину для корректного центрирования */
+  max-width: 90vw; /* 🔑 Не даёт тексту вылезать за экран на мобильных */
+}
+#guess-text span { color: #ffffff; font-size: 1.1em; display: block; margin-top: 10px; }
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+	
+  </style>
+</head>
+<body>
+  <!-- 🎉 Оверлей должен быть ПРЯМО в body, до .container -->
+  <div id="guess-overlay"><div id="guess-text"></div></div>
+  
+  <div class="container">
+    <h1>🐊 КРОКОДИЛ</h1>
+    <p class="rules">Один игрок показывает слово жестами, остальные вводят варианты в телефонах. После таймера ведущий переключает ход.</p>
+
+    <div id="lobby-view" class="lobby-grid">
+      <div class="left-col">
+        <h3>🎮 Игроки в комнате</h3>
+        <ul id="players-list"><li style="color: #aaa; border: none;">Ожидание подключений...</li></ul>
+      </div>
+      <div class="right-col">
+        <div id="qr-container"><img id="qr-img" src="" alt="QR"></div>
+        <button id="start-btn" class="btn" disabled>▶ СТАРТ РАУНДА</button>
+        <button id="next-btn" class="btn">➡ СЛЕДУЮЩИЙ РАУНД</button>
+      </div>
+    </div>
+
+    <div id="active-round">
+      <div id="question-text">Что изображает ...?</div>
+         <br> 
+		 <div id="timer">30</div>
+		 <br>
+    
+    </div>
+
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <!-- 🎉 Оверлей для сообщения об угадывании -->
+<div id="guess-overlay"><div id="guess-text"></div></div>
+
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+
+  <script>
+    // Вся логика без изменений
+    const socket = io();
+    const els = {
+      lobby: document.getElementById('lobby-view'), active: document.getElementById('active-round'),
+      question: document.getElementById('question-text'), timer: document.getElementById('timer'),
+      players: document.getElementById('players-list'), start: document.getElementById('start-btn'),
+      next: document.getElementById('next-btn'), qr: document.getElementById('qr-img')
+    };
+
+    fetch('/get-ip').then(r => r.json()).then(data => {
+      els.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://${data.ip}:3000/player`;
+    });
+
+    els.start.onclick = () => socket.emit('request-start-round');
+    els.next.onclick = () => socket.emit('next-turn');
+
+    socket.on('players-update', (players) => {
+      if (players.length === 0) {
+        els.players.innerHTML = '<li style="color: #aaa; border: none;">Ожидание подключений...</li>';
+        els.start.disabled = true; return;
+      }
+      els.players.innerHTML = players.map(p => 
+        `<li><span class="player-icon">${p.icon || '🎮'}</span> ${p.name} <b style="color: gold;">${p.score} 🌟</b></li>`
+      ).join('');
+      els.start.disabled = false;
+    });
+
+    socket.on('round-active', ({ actorName }) => {
+      els.lobby.style.display = 'none';
+      els.active.style.display = 'block';
+      els.question.textContent = `Что изображает ${actorName}?`;
+      els.timer.textContent = '30';
+      els.timer.className = '';
+    });
+
+    socket.on('timer-update', (time) => {
+      els.timer.textContent = time;
+      if (time <= 5) els.timer.className = 'timer-danger';
+      else if (time <= 10) els.timer.className = 'timer-warning';
+      else els.timer.className = '';
+    });
+
+    socket.on('time-up-finished', () => {
+      els.lobby.style.display = 'grid';
+      els.active.style.display = 'none';
+      els.next.style.display = 'block';
+      els.start.style.display = 'none';
+    });
+
+    socket.on('waiting-screen', () => {
+      els.lobby.style.display = 'grid';
+      els.active.style.display = 'none';
+      els.next.style.display = 'none';
+      els.start.style.display = 'block';
+    });
+// 🎉 Показываем сообщение, когда кто-то угадал
+socket.on('someone-guessed', ({ name }) => {
+  console.log('🎉 Угадал:', name); // Для отладки
+  const overlay = document.getElementById('guess-overlay');
+  const guessText = document.getElementById('guess-text');
+  if (overlay && guessText) {
+    guessText.innerHTML = `🎉 СЛОВО УГАДАЛ:<br><span>${name}</span>`;
+    overlay.style.display = 'flex';
+    setTimeout(() => { overlay.style.display = 'none'; }, 3500);
+  }
+});
+ </script>
+  
+</body>
+</html>

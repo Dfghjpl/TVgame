@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Крокодил - Игрок</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 30% 10%, #0a0f1e, #020408);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    /* Стеклянная карточка */
+    .container {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(18, 28, 40, 0.65);
+      backdrop-filter: blur(14px);
+      border-radius: 48px;
+      padding: 24px 20px 28px;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 255, 0.2), 0 0 20px rgba(0, 255, 255, 0.2);
+      transition: all 0.2s;
+    }
+
+    h1 {
+      margin: 0 0 16px 0;
+      font-size: 2rem;
+      text-align: center;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffffff, #80e0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+    }
+
+    /* Индикатор переподключения */
+    #reconnect-indicator {
+      display: none;
+      background: rgba(245, 158, 11, 0.9);
+      backdrop-filter: blur(4px);
+      color: #0f172a;
+      padding: 8px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 16px;
+      border: 1px solid #ffcc66;
+    }
+
+    /* Экран входа */
+    #join-screen {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1rem;
+      background: #0f1a24;
+      border: 2px solid #2a4c66;
+      border-radius: 60px;
+      color: #ffffff;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    input:focus {
+      border-color: #0ff;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      background: linear-gradient(135deg, #1e2a3a, #0f1722);
+      color: #0ff;
+      border: 1px solid cyan;
+      box-shadow: 0 5px 0 #001122;
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      transform: none;
+      cursor: not-allowed;
+      filter: grayscale(0.1);
+    }
+
+    #join-btn, #send-btn {
+      background: linear-gradient(135deg, #0f2c3b, #07121c);
+      color: #0ff;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+
+    #skip-btn {
+      background: linear-gradient(135deg, #5a3a1a, #3a2510);
+      border-color: #f39c12;
+      color: #ffdd99;
+    }
+
+    /* Игровой экран */
+    #game-screen {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #status {
+      font-size: 1rem;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 12px;
+      border-radius: 40px;
+      text-align: center;
+      color: #bbd4ff;
+      border-left: 4px solid cyan;
+      backdrop-filter: blur(4px);
+    }
+
+    #word-display {
+      font-size: 2.4rem;
+      font-weight: 800;
+      text-align: center;
+      padding: 20px 12px;
+      margin: 4px 0;
+      border-radius: 32px;
+      line-height: 1.2;
+      background: rgba(0, 255, 255, 0.08);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      color: #c6f0ff;
+      display: none;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
+    }
+
+    #word-display.has-word {
+      background: rgba(0, 255, 255, 0.15);
+      border: 1px solid cyan;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    #guess-area {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+   #feedback {
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 8px;
+  border-radius: 30px;
+  background: rgba(0,0,0,0.3);
+  transition: all 0.2s;
+}
+#feedback:empty {
+  display: none;
+}
+
+    /* Анимация появления */
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container, #join-screen, #game-screen, #word-display, #guess-area {
+      animation: fadeSlide 0.3s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐊 КРОКОДИЛ</h1>
+    <div id="reconnect-indicator">🔄 Переподключение...</div>
+    <div id="join-screen">
+      <input type="text" id="name-input" placeholder="Ваше имя" maxlength="15" autocomplete="off">
+      <button id="join-btn">Присоединиться</button>
+    </div>
+    <div id="game-screen">
+      <div id="status">⏳ Ожидание...</div>
+      <div id="word-display"></div>
+      <div id="guess-area">
+        <input type="text" id="guess-input" placeholder="Введите слово..." autocomplete="off">
+        <button id="send-btn">Отправить</button>
+      </div>
+      <button id="skip-btn">⏩ Пропустить (Ведущий)</button>
+      <div id="feedback"></div>
+    </div>
+  </div>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script>
+    // Вся логика остаётся неизменной
+    const socket = io();
+    
+    let myId = localStorage.getItem('croc_player_id');
+    if (!myId) {
+      myId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+      localStorage.setItem('croc_player_id', myId);
+    }
+    let savedName = localStorage.getItem('croc_player_name') || '';
+
+    const els = { 
+      joinScreen: document.getElementById('join-screen'), gameScreen: document.getElementById('game-screen'),
+      nameInput: document.getElementById('name-input'), joinBtn: document.getElementById('join-btn'), 
+      status: document.getElementById('status'), word: document.getElementById('word-display'),
+      guessArea: document.getElementById('guess-area'), guessInput: document.getElementById('guess-input'),
+      sendBtn: document.getElementById('send-btn'), skipBtn: document.getElementById('skip-btn'),
+      feedback: document.getElementById('feedback'), reconnect: document.getElementById('reconnect-indicator')
+    };
+
+    socket.on('connect', () => {
+      if (savedName) {
+        socket.emit('player-join', { name: savedName, playerId: myId });
+      }
+    });
+
+    socket.on('disconnect', () => { els.reconnect.style.display = 'block'; });
+    socket.on('connect', () => { els.reconnect.style.display = 'none'; });
+
+    els.joinBtn.onclick = () => {
+      const name = els.nameInput.value.trim();
+      if (!name) return alert('Введите имя!');
+      savedName = name;
+      localStorage.setItem('croc_player_name', name);
+      socket.emit('player-join', { name, playerId: myId });
+      els.joinScreen.style.display = 'none'; els.gameScreen.style.display = 'flex';
+    };
+    els.nameInput.onkeypress = e => { if (e.key === 'Enter') els.joinBtn.click(); };
+    els.guessInput.onkeypress = e => { if (e.key === 'Enter') els.sendBtn.click(); };
+    els.sendBtn.onclick = () => { if (els.guessInput.value.trim()) { socket.emit('guess-word', els.guessInput.value.trim()); els.guessInput.value = ''; } };
+    els.skipBtn.onclick = () => socket.emit('skip-word');
+
+    const resetUI = () => {
+      els.word.textContent = '';
+      els.word.style.display = 'none';
+      els.guessArea.style.display = 'none';
+      els.skipBtn.style.display = 'none';
+      els.feedback.textContent = '';
+      els.guessInput.disabled = true;
+      els.sendBtn.disabled = true;
+      els.guessInput.value = '';
+    };
+
+    socket.on('waiting-screen', () => {
+      els.status.textContent = '⏳ Ожидание...';
+      resetUI();
+    });
+
+    socket.on('actor-word', ({ word }) => {
+      els.status.textContent = '🤫 Показывай жестами! Не произноси слово.';
+      els.word.textContent = word.toUpperCase();
+      els.word.style.display = 'block';
+      els.skipBtn.style.display = 'block';
+      els.feedback.textContent = '';
+    });
+
+    socket.on('guessing-mode', () => {
+      els.status.textContent = '🧠 Угадывай слово!';
+      resetUI();
+      els.guessArea.style.display = 'flex';
+      els.guessInput.disabled = false;
+      els.sendBtn.disabled = false;
+      els.guessInput.focus();
+    });
+
+    socket.on('guess-feedback', ({ correct, message, remaining }) => {
+      els.feedback.textContent = message;
+      els.feedback.style.color = correct ? '#10b981' : '#ef4444';
+      if (remaining === 0) {
+        els.guessInput.disabled = true;
+        els.sendBtn.disabled = true;
+      }
+    });
+
+    socket.on('round-result', ({ message, word }) => {
+      els.status.textContent = message;
+      els.word.textContent = `Слово было: ${word}`;
+      els.word.style.display = 'block';
+      els.guessArea.style.display = 'none';
+      els.skipBtn.style.display = 'none';
+      els.feedback.textContent = '';
+    });
+
+    socket.on('someone-guessed', ({ name }) => {
+      els.status.textContent = `🎉 ${name} угадал!`;
+      resetUI();
+    });
+
+    socket.on('actor-timeout', ({ word }) => {
+      els.status.textContent = '⏰ Время вышло!';
+      els.word.textContent = `Загаданное слово: ${word}`;
+      els.word.style.display = 'block';
+      els.guessArea.style.display = 'none';
+      els.skipBtn.style.display = 'none';
+      els.feedback.textContent = '';
+    });
+
+    socket.on('word-skipped', () => {
+      if (els.skipBtn.style.display === 'block') {
+        els.status.textContent = '⏩ Новое слово получено!';
+      }
+    });
+  </script>
+</body>
+</html>
+</html>
